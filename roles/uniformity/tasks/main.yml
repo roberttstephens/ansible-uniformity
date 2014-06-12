@@ -1,0 +1,50 @@
+- name: Apt deps for uniformity
+  apt: name={{ item }} state=latest
+  with_items:
+   - libncurses5-dev
+   - libpq-dev
+   - supervisor
+
+- name: Check out the uniformity repo.
+  git:
+    repo=https://github.com/roberttstephens/not_uniformity.git
+    dest=/home/chase/uniformity
+    update=yes
+
+- name: Chown ~/src/environment
+  file:
+    path=/home/chase/uniformity
+    owner=tyler
+    group=Developers
+    recurse=yes
+
+- name: Install python 3.4
+  get_url: url=https://www.python.org/ftp/python/3.4.1/Python-3.4.1.tgz dest=/usr/local/src/Python-3.4.1.tar.gz
+  register: install_python
+
+- name: Untar python 3.4
+  command: tar -zxf /usr/local/src/Python-3.4.1.tar.gz chdir=/usr/local/src
+  when: install_python.changed
+
+- name: Compile python 3.4
+  shell: ./configure && make && make altinstall chdir=/usr/local/src/Python-3.4.1
+  when: install_python.changed
+
+- name: Install virtualenv
+  pip: name=virtualenv executable=pip3.4
+  when: install_python.changed
+
+- name: Set up venv
+  pip:
+    requirements=/home/chase/uniformity/requirements.txt
+    executable=pip3.4
+    virtualenv=/home/chase/uniformity/venv
+
+- name: Copy the supervisor config
+  copy:
+    src=../templates/uniformity.conf dest=/etc/supervisor/conf.d/uniformity.conf
+  register: copy_supervisor
+
+- name: Restart supervisor
+  shell: supervisorctl reread && supervisorctl reload && supervisorctl restart uniformity
+  when: copy_supervisor.changed
