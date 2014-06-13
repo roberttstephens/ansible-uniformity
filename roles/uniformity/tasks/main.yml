@@ -42,7 +42,7 @@
 
 - name: Copy the supervisor config
   copy:
-    src=../templates/uniformity.conf dest=/etc/supervisor/conf.d/uniformity.conf
+    src=../files/uniformity.conf dest=/etc/supervisor/conf.d/uniformity.conf
   register: copy_supervisor
 
 - name: Restart supervisor

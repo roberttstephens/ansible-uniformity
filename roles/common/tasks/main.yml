@@ -86,6 +86,9 @@
     - { src: '_shrc', dest: '.shrc'}
     - { src: 'shared_bin', dest: 'shared_bin'}
 
+- name: Create the .zshrc file if necessary.
+  copy:
+    src=../files/.zshrc dest=/home/tyler/.zshrc force=no
 
 - name: Source shared shrc file.
   lineinfile:
