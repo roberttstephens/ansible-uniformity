@@ -1,0 +1,37 @@
+# ansible-playbook -i hosts bootstrap.yml -k
+- name: Apply common configurations to all hosts.
+  hosts: all
+  user: root
+
+  tasks:
+  - name: Install sudo
+    apt: name=sudo state=latest
+
+  - name: Create the sudo group
+    group:
+      name=sudo
+      state=present
+
+  - name: Create a new user
+    user:
+      name=deploy
+      state=present
+      groups="sudo"
+      shell=/bin/bash
+      password=$6$rounds=100000$kOPsL36LobJSBkbM$qs04KIxy/i7hxwrNnaQhz8vVF7lt1UOqydXYKIjwJ./u0diaSvdREIVrs.wmduWHCu4IOfll66d8Q.HQ2RWdC/
+
+  - name: copy ssh key
+    authorized_key:
+      key="{{ lookup('file', '/home/tyler/.ssh/id_rsa.pub') }}"=
+      user=deploy
+
+  - name: Add deploy user to sudoers
+    action: lineinfile dest=/etc/sudoers regexp="deploy ALL" line="deploy ALL=(ALL) ALL" state=present
+
+  - name: Disallow root SSH access
+    action: lineinfile dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin no" state=present
+    notify: Restart ssh
+
+  handlers:
+  - name: Restart ssh
+    action: service name=ssh state=restarted

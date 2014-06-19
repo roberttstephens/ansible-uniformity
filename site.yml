@@ -1,8 +1,10 @@
 - name: Apply common configurations to all hosts.
   hosts: all
-  user: root
+  user: deploy
+  sudo: yes
   roles:
    - common
+   - environment
 
 - include: dbservers.yml
 - include: webservers.yml

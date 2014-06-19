@@ -1,6 +1,7 @@
 - name: apply configuration to webservers
   hosts: webservers
-  user: root
+  user: deploy
+  sudo: yes
   vars:
     nginx_user: "www-data"
     nginx_sites:

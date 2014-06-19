@@ -1,6 +1,7 @@
 - name: apply configuration to dbservers
   hosts: dbservers
-  user: root
+  user: deploy
+  sudo: yes
   vars:
     postgresql_databases:
      - name: uniformity
